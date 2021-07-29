@@ -1,7 +1,14 @@
 #include <Arduino.h>
-#include <mcp2515.h>
+#include "mcp2515.h"
 
-MCP2515 *canb;
+// Change these 2 defines if your CS pins are different
+// They CANNOT be the same
+#define CANB_CS 4
+#define CANC_CS 5
+
+MCP2515* canC;
+MCP2515* canB;
+
 can_frame read = {0x00};
 
 void printFrame() {
@@ -18,15 +25,15 @@ bool hasFrame = false;
 void setup()
 {
     Serial.begin(115200);
-    canb = new MCP2515(4);
-	canb->reset();
-    canb->setBitrate(CAN_83K3BPS);
-    canb->setNormalMode();
+    canB = new MCP2515(CANB_CS);
+	  canB->reset();
+    canB->setBitrate(CAN_83K3BPS);
+    canB->setNormalMode();
 }
 
 void loop()
 {
-	if (canb->readMessage(&read) == MCP2515::ERROR_OK) {
+	if (canB->readMessage(&read) == MCP2515::ERROR_OK) {
         bool awake = true;
         if (awake && !hasFrame) {
             hasFrame = true;
@@ -36,7 +43,7 @@ void loop()
             read.data[1] = 0x05;
             read.data[2] = 0x20;
             read.data[3] = 0x06;
-            canb->sendMessage(&read);
+            canB->sendMessage(&read);
             Serial.print("Send ");
             printFrame();
         }
